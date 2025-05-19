@@ -5,9 +5,8 @@ import threading
 
 app = Flask(__name__)
 
-# Configurações do RabbitMQ
 broker = 'localhost'
-port = 5672  # Porta padrão do AMQP
+port = 5672
 queue_humidity = 'humidity_sensor'
 queue_temperature = 'temperature_sensor'
 
@@ -16,10 +15,8 @@ def setup_rabbitmq_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=broker, port=port, credentials=pika.PlainCredentials('admin', 'admin')))
     channel = connection.channel()
     
-    # Declara a exchange (opcional, mas boa prática)
     channel.exchange_declare(exchange='sensor_data', exchange_type='topic')
     
-    # Declara a fila
     channel.queue_declare(queue=queue_humidity, durable=False)
     channel.queue_bind(exchange='sensor_data', queue=queue_humidity, routing_key=queue_humidity)
 
@@ -37,7 +34,6 @@ def setup_rabbitmq_connection():
     print('Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
 
-# Inicia a conexão com RabbitMQ em uma thread separada
 rabbit_thread = threading.Thread(target=setup_rabbitmq_connection)
 rabbit_thread.daemon = True
 rabbit_thread.start()
