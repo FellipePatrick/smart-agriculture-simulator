@@ -61,5 +61,5 @@ python atuador.py
 ```bash
 python /interface_monitoramento/app.py
 ```
-Interface: http://localhost:5000
+- Interface: http://localhost:5000
 ---
