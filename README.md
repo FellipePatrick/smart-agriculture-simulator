@@ -9,12 +9,6 @@ Este projeto simula um ambiente de Agricultura 4.0 utilizando comunicação indi
 - Scripts simulando sensores e atuadores (Python)
 
 ---
-## 🐍 Rodando comando para instalar as dependências do Python e Flask
-
-```bash
-pip install -r requirements.txt
-```
----
 ## 🚀 Como rodar o RabbitMQ com Docker Compose
 
 ### 1. Clone o repositório
@@ -37,4 +31,30 @@ docker-compose up -d
 
 - Porta de comunicação (AMQP): 5672
 
+- Usuario e Senha: Admin
+  
+---
+
+## 🐍 Interface em Flask, sensores e atuadores
+
+### 1. Instalando dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Rodando os sensores
+```bash
+python sensor.py
+```
+
+### 3. Rodando o atuador
+```bash
+python atuador.py
+```
+
+### 4. Rodando o servidor da interface dentro da pasta
+```bash
+python /interface_monitoramento/app.py
+```
 ---
