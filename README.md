@@ -35,14 +35,18 @@ docker-compose up -d
   
 ---
 
-## 🐍 Interface em Flask, sensores e atuadores
+## 🐍 Interface em Flask, Sensores e Atuadores
 
-### 1. Instalando dependências
-
+### 1. Instalando ambiente virtual localmente
+```bash
+python -m venv venv
+```
+```bash
+.\venv\Scripts\Activate.ps1
+```
 ```bash
 pip install -r requirements.txt
 ```
-
 ### 2. Rodando os sensores
 ```bash
 python sensor.py
@@ -57,4 +61,5 @@ python atuador.py
 ```bash
 python /interface_monitoramento/app.py
 ```
+Interface: http://localhost:5000
 ---
