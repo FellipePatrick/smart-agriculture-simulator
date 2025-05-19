@@ -5,7 +5,7 @@ import time
 class Sensor:
     def __init__(self, sensor_type):
         self.sensor_type = sensor_type
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', credentials=pika.PlainCredentials('admin', 'admin')))
         self.channel = self.connection.channel()
 
     def send_data(self):
@@ -32,6 +32,6 @@ if __name__ == "__main__":
     sensor_types = ["temperature_sensor", "humidity_sensor"]        
     while True:
         sensor_type = random.choice(sensor_types)
-        sensor = Sensor(sensor_types)
+        sensor = Sensor(sensor_type)
         sensor.send_data()
         time.sleep(2)

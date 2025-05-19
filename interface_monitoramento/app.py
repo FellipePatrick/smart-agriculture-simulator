@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 broker = 'localhost'
 port = 15672
-topic = 'test'
+topic = 'humidity_sensor'
 
 def on_connect(client, userdata, flags, rc):
     print(f'Connected with result code {rc}')
