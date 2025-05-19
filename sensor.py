@@ -11,7 +11,7 @@ class Sensor:
     def send_data(self):
         self.channel.queue_declare(queue=self.queue_name())
         data = self.get_data_sensor()
-        self.channel.basic_publish(exchange='',
+        self.channel.basic_publish(exchange='sensor_data',
                                     routing_key=self.queue_name(),
                                     body=str(data))
         print(f" [x] Sent {data} to {self.sensor_type}")

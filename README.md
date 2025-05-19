@@ -8,6 +8,11 @@ Este projeto simula um ambiente de Agricultura 4.0 utilizando comunicação indi
 - Docker + Docker Compose
 - Scripts simulando sensores e atuadores (Python)
 
+## 🐍 Rodando comando para instalar as dependências do Python e Flask
+
+```bash
+pip install -r requirements.txt
+```
 ---
 ## 🚀 Como rodar o RabbitMQ com Docker Compose
 
@@ -19,6 +24,7 @@ cd smart-agriculture-simulator
 ```
 
 ### 2. Suba o container
+
 ```bash
 docker-compose up -d
 ```
@@ -29,3 +35,5 @@ docker-compose up -d
 - Interface de administração: http://localhost:15672
 
 - Porta de comunicação (AMQP): 5672
+
+---

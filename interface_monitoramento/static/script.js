@@ -1,5 +1,5 @@
 function atualizarMensagens() {
-  fetch('/mensagens')
+  fetch('/messages')
     .then(res => res.json())
     .then(dados => {
       const tbody = document.querySelector('#tabela tbody');
