@@ -8,6 +8,7 @@ Este projeto simula um ambiente de Agricultura 4.0 utilizando comunicação indi
 - Docker + Docker Compose
 - Scripts simulando sensores e atuadores (Python)
 
+---
 ## 🐍 Rodando comando para instalar as dependências do Python e Flask
 
 ```bash
