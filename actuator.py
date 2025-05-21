@@ -31,7 +31,7 @@ class Actuator:
     
     def callback(self, ch, method, properties, body):
         if self.actuator_type == "fan":
-            print(f"Estado do aquecedor: {body.decode() == 'ON'}")
+            print(f"Estado do ventilador: {body.decode() == 'ON'}")
 
         elif self.actuator_type == "light":
             print(f"Estado da luz: {body.decode() == 'ON'}")
