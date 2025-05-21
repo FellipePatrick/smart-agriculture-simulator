@@ -22,7 +22,7 @@ class Sensor:
     
     def get_data_sensor(self):
         if self.sensor_type == "temperature_sensor":
-            return round(random.uniform(10.0, 40.0),2)
+            return round(random.uniform(28.0, 40.0),2)
         elif self.sensor_type == "humidity_sensor":
             return round(random.uniform(30.0, 70.0),2)
 

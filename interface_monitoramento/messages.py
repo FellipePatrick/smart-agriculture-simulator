@@ -1,6 +1,6 @@
 from collections import deque
 
-messagens = deque(maxlen=100)
+messagens = deque(maxlen=20)
 
 def add_message(topic, payload):
     from datetime import datetime
@@ -13,3 +13,11 @@ def add_message(topic, payload):
 
 def get_messages():
     return list(messagens)
+
+def post_message(topic, payload):
+    from datetime import datetime
+    messagens.append({
+        'topic': topic,
+        'payload': payload,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })

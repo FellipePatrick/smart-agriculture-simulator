@@ -2,22 +2,216 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Monitor MQTT</title>
-  <script src="/static/script.js" defer></script>
+  <title>Monitor de Sensores</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f4f4f4; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    nav {
+      background: #4CAF50;
+      padding: 10px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav h1 { margin: 0; font-size: 1.5em; }
+    nav .valores { font-size: 1em; }
+    main { padding: 20px; }
+    canvas { max-width: 100%; margin-top: 20px; }
+    .graficos-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    .grafico {
+      flex: 1 1 45%;
+    }
+    #ultima-atualizacao {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .btn-atuador {
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        border-radius: 8px;
+        background-color: #ddd;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .btn-atuador.on {
+        background-color: #4CAF50;
+        color: white;
+      }
+      .btn-atuador:hover {
+        background-color: #bbb;
+      }
+
   </style>
 </head>
 <body>
-  <h1>Monitor MQTT em Tempo Real</h1>
-  <table id="tabela">
-    <thead>
-      <tr><th>Horário</th><th>Tópico</th><th>Mensagem</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <nav>
+    <h1>Monitor de Sensores</h1>
+    <div class="valores">
+      🌡️ Temp: <span id="valor-temp">--</span> °C |
+      💧 Umidade: <span id="valor-umidade">--</span> %
+
+    </div>
+  </nav>
+
+  <main>
+    <div id="ultima-atualizacao">Última atualização: --</div>
+
+    <h2>Controle de Atuadores</h2>
+        <div id="atuadores" style="display: flex; gap: 20px; margin-bottom: 20px;">
+          <button id="btn-light" class="btn-atuador">💡 Lâmpada</button>
+          <button id="btn-fan" class="btn-atuador">🌀 Ventilador</button>
+    </div>
+
+
+    <div class="graficos-container">
+      <div class="grafico">
+        <h2>Temperatura (°C)</h2>
+        <canvas id="grafico-temp"></canvas>
+      </div>
+      <div class="grafico">
+        <h2>Umidade (%)</h2>
+        <canvas id="grafico-umidade"></canvas>
+      </div>
+    </div>
+
+    <h2>Histórico de Mensagens</h2>
+    <table id="tabela" class="display">
+      <thead>
+        <tr><th>Horário</th><th>Tópico</th><th>Mensagem</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script>
+    const ctxTemp = document.getElementById('grafico-temp').getContext('2d');
+    const ctxUmidade = document.getElementById('grafico-umidade').getContext('2d');
+
+    const graficoTemp = new Chart(ctxTemp, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Temperatura',
+          data: [],
+          borderColor: 'red',
+          backgroundColor: 'rgba(255, 0, 0, 0.1)',
+          tension: 0.2
+        }]
+      }
+    });
+
+    const graficoUmidade = new Chart(ctxUmidade, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Umidade',
+          data: [],
+          borderColor: 'blue',
+          backgroundColor: 'rgba(0, 0, 255, 0.1)',
+          tension: 0.2
+        }]
+      }
+    });
+
+    function atualizarHoraBrasileira() {
+      const now = new Date();
+      const brt = new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      return brt.toLocaleString("pt-BR");
+    }
+
+    function atualizarInterface() {
+      fetch('/messages')
+        .then(response => response.json())
+        .then(data => {
+          const tabela = $('#tabela').DataTable();
+          tabela.clear();
+
+          let tempAtual = "--";
+          let umidadeAtual = "--";
+
+          data.forEach(msg => {
+            tabela.row.add([msg.timestamp, msg.topic, msg.payload]);
+            const valor = parseFloat(msg.payload);
+            if (msg.topic.includes("temperature_sensor")) {
+              graficoTemp.data.labels.push(msg.timestamp);
+              graficoTemp.data.datasets[0].data.push(valor);
+              tempAtual = valor;
+            } else if (msg.topic.includes("humidity_sensor")) {
+              graficoUmidade.data.labels.push(msg.timestamp);
+              graficoUmidade.data.datasets[0].data.push(valor);
+              umidadeAtual = valor;
+            }
+          });
+
+          $('#valor-temp').text(tempAtual);
+          $('#valor-umidade').text(umidadeAtual);
+          $('#ultima-atualizacao').text('Última atualização: ' + atualizarHoraBrasileira());
+
+          graficoTemp.update();
+          graficoUmidade.update();
+          tabela.draw();
+        });
+    }
+
+    $(document).ready(function () {
+      $('#tabela').DataTable({
+        pageLength: 5,
+        language: {
+          url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+        }
+      });
+
+      atualizarInterface();
+      setInterval(atualizarInterface, 5000); // atualiza a cada 5s
+    });
+
+    function toggleAtuador(id, atuador) {
+        const botao = document.getElementById(id);
+        const estadoAtual = botao.classList.contains('on') ? 'off' : 'on';
+
+        fetch(`/atuador/${atuador}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estado: estadoAtual })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status) {
+            botao.classList.toggle('on');
+          } else {
+            alert('Erro: ' + data.erro);
+          }
+        });
+      }
+
+      $(document).ready(function () {
+        $('#tabela').DataTable({
+          pageLength: 5,
+          language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+          }
+        });
+
+        $('#btn-light').click(() => toggleAtuador('btn-light', 'light'));
+        $('#btn-fan').click(() => toggleAtuador('btn-fan', 'fan'));
+
+        atualizarInterface();
+        setInterval(atualizarInterface, 1000); // atualiza a cada 5s
+      });
+
+  </script>
 </body>
 </html>

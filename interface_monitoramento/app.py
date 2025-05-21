@@ -46,5 +46,39 @@ def messages():
 def index():
     return render_template('index.html')
 
+@app.route('/atuador/<nome>', methods=['POST'])
+def controlar_atuador(nome):
+    data = request.get_json()
+    estado = data.get('estado')
+
+    if nome not in ['light', 'fan'] or estado not in ['on', 'off']:
+        return jsonify({'erro': 'Requisição inválida'}), 400
+
+    # Publicar no RabbitMQ
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host=broker,
+            credentials=pika.PlainCredentials('admin', 'admin')
+        ))
+        channel = connection.channel()
+        channel.exchange_declare(exchange='actuator_data', exchange_type='topic')
+
+        routing_key = f'{nome}'
+        if( estado == 'on'):
+            estado = 'ON'
+        else:
+            estado = 'OFF'
+        print(f"Publishing message: {routing_key} {estado}")
+        channel.basic_publish(
+            exchange='actuator_data',
+            routing_key=routing_key,
+            body=estado
+        )
+        connection.close()
+        return jsonify({'status': f'{nome} {estado}'})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)
